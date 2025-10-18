@@ -1,0 +1,33 @@
+
+---
+
+## ⚙️ **.gitignore**
+
+```gitignore
+# AWS SAM build artifacts
+.aws-sam/
+*.pyc
+__pycache__/
+*.log
+
+# SAM configuration
+samconfig.toml
+
+# Python virtual environments
+.env/
+.venv/
+env/
+venv/
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak

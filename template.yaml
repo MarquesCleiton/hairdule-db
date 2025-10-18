@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: HairduleDB - DynamoDB Table (HairduleTB)
+
+Resources:
+  HairduleTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: HairduleTB
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: pk,     AttributeType: S }
+        - { AttributeName: sk,     AttributeType: S }
+        - { AttributeName: gsi1pk, AttributeType: S }
+        - { AttributeName: gsi1sk, AttributeType: S }
+        - { AttributeName: email,  AttributeType: S }
+      KeySchema:
+        - { AttributeName: pk, KeyType: HASH }
+        - { AttributeName: sk, KeyType: RANGE }
+      GlobalSecondaryIndexes:
+        - IndexName: GSI1
+          KeySchema:
+            - { AttributeName: gsi1pk, KeyType: HASH }
+            - { AttributeName: gsi1sk, KeyType: RANGE }
+          Projection: 
+            ProjectionType: ALL
+        - IndexName: GSI_EMAIL
+          KeySchema:
+            - { AttributeName: email, KeyType: HASH }
+          Projection:
+            ProjectionType: ALL
+      TimeToLiveSpecification:
+        AttributeName: expiresAt
+        Enabled: true
+
+Outputs:
+  HairduleTableName:
+    Description: Nome da tabela DynamoDB criada
+    Value: !Ref HairduleTable
+  HairduleTableArn:
+    Description: ARN da tabela DynamoDB
+    Value: !GetAtt HairduleTable.Arn
