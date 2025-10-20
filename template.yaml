@@ -8,35 +8,67 @@ Resources:
     Properties:
       TableName: HairduleTB
       BillingMode: PAY_PER_REQUEST
+
       AttributeDefinitions:
         - { AttributeName: pk,     AttributeType: S }
         - { AttributeName: sk,     AttributeType: S }
         - { AttributeName: gsi1pk, AttributeType: S }
         - { AttributeName: gsi1sk, AttributeType: S }
         - { AttributeName: email,  AttributeType: S }
+        - { AttributeName: refreshTokenHash, AttributeType: S }
+        # ⚙️ Opcional futuro — listar usuários de um negócio
+        - { AttributeName: gsiBusinessUser, AttributeType: S }
+
       KeySchema:
         - { AttributeName: pk, KeyType: HASH }
         - { AttributeName: sk, KeyType: RANGE }
+
       GlobalSecondaryIndexes:
+        # Índice 1: Relacionamentos USER → BUSINESS
         - IndexName: GSI1
           KeySchema:
             - { AttributeName: gsi1pk, KeyType: HASH }
             - { AttributeName: gsi1sk, KeyType: RANGE }
-          Projection: 
+          Projection:
             ProjectionType: ALL
+
+        # Índice 2: Login por e-mail
         - IndexName: GSI_EMAIL
           KeySchema:
             - { AttributeName: email, KeyType: HASH }
           Projection:
             ProjectionType: ALL
+
+        # Índice 3: Refresh token seguro (para /auth/refresh)
+        - IndexName: GSI_REFRESH_HASH
+          KeySchema:
+            - { AttributeName: refreshTokenHash, KeyType: HASH }
+          Projection:
+            ProjectionType: ALL
+
+        # ⚙️ Índice 4 (opcional): listar usuários de um negócio
+        - IndexName: GSI_BUSINESS_USER
+          KeySchema:
+            - { AttributeName: gsiBusinessUser, KeyType: HASH }
+          Projection:
+            ProjectionType: ALL
+
+      # TTL ativo (limpeza automática de sessões expiradas)
       TimeToLiveSpecification:
         AttributeName: expiresAt
         Enabled: true
+
+      # 🧩 Sugestão de atributos padrão nos itens (não obrigatórios no schema)
+      # - status: active | disabled | revoked
+      # - entityType: user | session | business | role | link
+      # - createdAt / updatedAt: ISO8601
+      # - revokedBy (opcional, em SESSION#): USER#id ou system
 
 Outputs:
   HairduleTableName:
     Description: Nome da tabela DynamoDB criada
     Value: !Ref HairduleTable
+
   HairduleTableArn:
     Description: ARN da tabela DynamoDB
     Value: !GetAtt HairduleTable.Arn
